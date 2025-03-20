@@ -38,6 +38,16 @@ func (c *commands) users(name string, f func(*state, command) error) {
 	c.commandMap[name] = f
 }
 
+func (c *commands) agg(name string, f func(*state, command) error) {
+	c.commandMap[name] = f
+}
+func (c *commands) addfeed(name string, f func(*state, command) error) {
+	c.commandMap[name] = f
+}
+func (c *commands) feeds(name string, f func(*state, command) error) {
+	c.commandMap[name] = f
+}
+
 func (c *commands) run(s *state, cmd command) error {
 	handler, exists := c.commandMap[cmd.name]
 	if !exists {
@@ -77,6 +87,9 @@ func main() {
 	cmds.register("register", handlerRegister)
 	cmds.reset("reset", handlerReset)
 	cmds.users("users", handlerUsers)
+	cmds.agg("agg", handlerFeed)
+	cmds.addfeed("addfeed", handlerAddFeed)
+	cmds.feeds("feeds", handlerFeeds)
 
 	err = cmds.run(&s, cmd)
 	if err != nil {
