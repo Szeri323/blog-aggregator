@@ -11,7 +11,7 @@ RETURNING *;
 -- name: GetUser :one
 SELECT * FROM users WHERE name = $1;
 
--- name: TruncateUserTable :exec
+-- name: TruncateUsersTable :exec
 TRUNCATE TABLE users CASCADE;
 
 -- name: GetUsers :many

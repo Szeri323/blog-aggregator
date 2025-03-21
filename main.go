@@ -47,6 +47,12 @@ func (c *commands) addfeed(name string, f func(*state, command) error) {
 func (c *commands) feeds(name string, f func(*state, command) error) {
 	c.commandMap[name] = f
 }
+func (c *commands) follow(name string, f func(*state, command) error) {
+	c.commandMap[name] = f
+}
+func (c *commands) following(name string, f func(*state, command) error) {
+	c.commandMap[name] = f
+}
 
 func (c *commands) run(s *state, cmd command) error {
 	handler, exists := c.commandMap[cmd.name]
@@ -90,6 +96,8 @@ func main() {
 	cmds.agg("agg", handlerFeed)
 	cmds.addfeed("addfeed", handlerAddFeed)
 	cmds.feeds("feeds", handlerFeeds)
+	cmds.follow("follow", handlerFollow)
+	cmds.following("following", handlerFollowing)
 
 	err = cmds.run(&s, cmd)
 	if err != nil {
