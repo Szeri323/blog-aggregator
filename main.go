@@ -22,40 +22,15 @@ type command struct {
 }
 
 type commands struct {
-	commandMap map[string]func(*state, command) error
+	registerCommands map[string]func(*state, command) error
 }
 
-func (c *commands) login(name string, f func(*state, command) error) {
-	c.commandMap[name] = f
-}
 func (c *commands) register(name string, f func(*state, command) error) {
-	c.commandMap[name] = f
-}
-func (c *commands) reset(name string, f func(*state, command) error) {
-	c.commandMap[name] = f
-}
-func (c *commands) users(name string, f func(*state, command) error) {
-	c.commandMap[name] = f
-}
-
-func (c *commands) agg(name string, f func(*state, command) error) {
-	c.commandMap[name] = f
-}
-func (c *commands) addfeed(name string, f func(*state, command) error) {
-	c.commandMap[name] = f
-}
-func (c *commands) feeds(name string, f func(*state, command) error) {
-	c.commandMap[name] = f
-}
-func (c *commands) follow(name string, f func(*state, command) error) {
-	c.commandMap[name] = f
-}
-func (c *commands) following(name string, f func(*state, command) error) {
-	c.commandMap[name] = f
+	c.registerCommands[name] = f
 }
 
 func (c *commands) run(s *state, cmd command) error {
-	handler, exists := c.commandMap[cmd.name]
+	handler, exists := c.registerCommands[cmd.name]
 	if !exists {
 		return fmt.Errorf("unknown command: %s", cmd.name)
 	}
@@ -87,17 +62,20 @@ func main() {
 	dbQueries := database.New(db)
 	s.db = dbQueries
 
-	var cmds commands
-	cmds.commandMap = make(map[string]func(*state, command) error)
-	cmds.login("login", handlerLogin)
+	cmds := commands{
+		registerCommands: make(map[string]func(*state, command) error),
+	}
+	cmds.register("login", handlerLogin)
 	cmds.register("register", handlerRegister)
-	cmds.reset("reset", handlerReset)
-	cmds.users("users", handlerUsers)
-	cmds.agg("agg", handlerFeed)
-	cmds.addfeed("addfeed", handlerAddFeed)
-	cmds.feeds("feeds", handlerFeeds)
-	cmds.follow("follow", handlerFollow)
-	cmds.following("following", handlerFollowing)
+	cmds.register("reset", handlerReset)
+	cmds.register("users", handlerListUsers)
+	cmds.register("agg", handlerAgg)
+	cmds.register("addfeed", middlewareLoggedIn(handlerAddFeed))
+	cmds.register("feeds", handlerListFeeds)
+	cmds.register("follow", middlewareLoggedIn(handlerFollow))
+	cmds.register("following", middlewareLoggedIn(handlerFollowing))
+	cmds.register("unfollow", middlewareLoggedIn(handlerUnfollow))
+	cmds.register("browse", middlewareLoggedIn(handlerBrowsePosts))
 
 	err = cmds.run(&s, cmd)
 	if err != nil {
