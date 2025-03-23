@@ -35,7 +35,7 @@ To create a binary file and use it in root directory via relative:
 ```
 or absolute path: 
 ```bash 
-~/gator <...rest of commands>
+~/ + path_to_dir/ + gator <...rest of commands>
 ```
 To install gator CLI app in to your system and use it where every path you want you need to execute go install command in root gator directory:
 ```bash
